@@ -22,6 +22,7 @@ public class UserDaoHibernateImpl implements UserDao {
     public void createUsersTable() {
         Transaction transaction = null;
         try (Session session = sessionFactory.getCurrentSession()) {
+            transaction = session.beginTransaction();
             session.createSQLQuery("CREATE TABLE IF NOT EXISTS users (\n" +
                     "  `id` INT NOT NULL AUTO_INCREMENT,\n" +
                     "  `name` VARCHAR(45) NOT NULL,\n" +
@@ -29,7 +30,6 @@ public class UserDaoHibernateImpl implements UserDao {
                     "  `age` INT NOT NULL,\n" +
                     "   PRIMARY KEY (`id`))")
                     .executeUpdate();
-            transaction = session.beginTransaction();
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) {
@@ -43,9 +43,9 @@ public class UserDaoHibernateImpl implements UserDao {
     public void dropUsersTable() {
         Transaction transaction = null;
         try (Session session = sessionFactory.getCurrentSession()) {
+            transaction = session.beginTransaction();
             session.createSQLQuery("DROP TABLE IF EXISTS users")
                     .executeUpdate();
-            transaction = session.beginTransaction();
             transaction.commit();
         } catch (Exception e) {
             if (transaction != null) {
@@ -85,17 +85,11 @@ public class UserDaoHibernateImpl implements UserDao {
     @Override
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
-        Transaction transaction = null;
         try (Session session = sessionFactory.getCurrentSession()) {
-            transaction = session.beginTransaction();
+            session.beginTransaction();
             users = session.createQuery("from User")
                     .getResultList();
-
-            transaction.commit();
-        } catch (Exception e) {
-            if (transaction != null) {
-                transaction.rollback();
-            } e.printStackTrace();
+            session.getTransaction().commit();
         }
         return users;
     }
